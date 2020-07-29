@@ -2,10 +2,9 @@ package pl.marcinblok.patientservice;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class PatientController {
@@ -18,6 +17,12 @@ public class PatientController {
     String add(@RequestBody Patient patient) {
         patientRepository.save(patient);
         return "Saved";
+    }
+
+    @GetMapping(path="/patient")
+    public @ResponseBody
+    List<Patient> getAll() {
+        return patientRepository.findAll();
     }
 
 }
