@@ -12,17 +12,26 @@ public class PatientController {
     @Autowired
     private PatientRepository patientRepository;
 
-    @PostMapping(path = "/patient")
+    @PostMapping(path = "/patients")
     public @ResponseBody
     String add(@RequestBody Patient patient) {
         patientRepository.save(patient);
         return "Saved";
     }
 
-    @GetMapping(path="/patient")
+    @GetMapping(path = "/patients")
     public @ResponseBody
     List<Patient> getAll() {
         return patientRepository.findAll();
     }
+
+
+    @DeleteMapping(path = "/patients/{id}")
+    public @ResponseBody
+    String deletePatientById(@PathVariable Integer id) {
+        patientRepository.deleteById(id);
+        return "Patient with id " + id + " has been succesfully removed from database";
+    }
+
 
 }
