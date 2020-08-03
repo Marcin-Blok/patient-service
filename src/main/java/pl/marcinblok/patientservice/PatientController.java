@@ -2,6 +2,8 @@ package pl.marcinblok.patientservice;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,8 +24,8 @@ public class PatientController {
 
     @GetMapping(path = "/patients")
     public @ResponseBody
-    List<Patient> getAll() {
-        return patientRepository.findAll();
+    ResponseEntity<List<Patient>> getAll() {
+        return new ResponseEntity<>(patientRepository.findAll(), HttpStatus.OK);
     }
 
     @DeleteMapping(path = "/patients/{id}")
@@ -34,8 +36,8 @@ public class PatientController {
     }
 
     @PutMapping("/patients/{id}")
-    Optional<Patient> replacePatient(@RequestBody Patient newPatient, @PathVariable Integer id) {
-        return patientRepository.findById(id).map(patient -> {
+    public ResponseEntity<Patient> replacePatient(@RequestBody Patient newPatient, @PathVariable Integer id) {
+        Optional<Patient> pacjentPoZmianie = patientRepository.findById(id).map(patient -> {
             if (newPatient.getName() != null) {
                 patient.setName(newPatient.getName());
             }
@@ -47,5 +49,11 @@ public class PatientController {
             }
             return patientRepository.save(patient);
         });
+
+        if (pacjentPoZmianie.isEmpty()) {
+            return new ResponseEntity<Patient>(HttpStatus.NOT_MODIFIED);
+        }else{
+            return new ResponseEntity<Patient>(pacjentPoZmianie.get(), HttpStatus.OK);
+        }
     }
 }
