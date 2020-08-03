@@ -56,4 +56,9 @@ public class PatientController {
             return new ResponseEntity<Patient>(pacjentPoZmianie.get(), HttpStatus.OK);
         }
     }
+
+    @GetMapping(path = "/patients/{pesel}")
+    public Patient getPatientByPesel(@PathVariable String pesel) {
+        return patientRepository.getPatientByPesel(pesel);
+    }
 }
