@@ -1,6 +1,5 @@
 package pl.marcinblok.patientservice;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +15,11 @@ public class PatientController {
     private PatientRepository patientRepository;
 
     @PostMapping(path = "/patients")
-    public @ResponseBody
-    String add(@RequestBody Patient patient) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void add(@RequestBody Patient patient) {
         patientRepository.save(patient);
-        return "Saved";
     }
+    
 
     @GetMapping(path = "/patients")
     public @ResponseBody
@@ -28,11 +27,15 @@ public class PatientController {
         return new ResponseEntity<>(patientRepository.findAll(), HttpStatus.OK);
     }
 
+    @GetMapping("/patients/{pesel}")
+    public ResponseEntity<Patient> getPatientByPesel(@PathVariable String pesel) {
+        return new ResponseEntity<>(patientRepository.getPatientByPesel(pesel), HttpStatus.OK);
+    }
+
     @DeleteMapping(path = "/patients/{id}")
     public @ResponseBody
-    String deletePatientById(@PathVariable Integer id) {
-        patientRepository.deleteById(id);
-        return "Patient with id " + id + " has been succesfully removed from database";
+    void deletePatientById(@PathVariable Integer id) {
+          patientRepository.deleteById(id);
     }
 
     @PutMapping("/patients/{id}")
@@ -52,13 +55,8 @@ public class PatientController {
 
         if (pacjentPoZmianie.isEmpty()) {
             return new ResponseEntity<Patient>(HttpStatus.NOT_MODIFIED);
-        }else{
+        } else {
             return new ResponseEntity<Patient>(pacjentPoZmianie.get(), HttpStatus.OK);
         }
-    }
-
-    @GetMapping(path = "/patients/{pesel}")
-    public Patient getPatientByPesel(@PathVariable String pesel) {
-        return patientRepository.getPatientByPesel(pesel);
     }
 }
