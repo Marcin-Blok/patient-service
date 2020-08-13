@@ -7,17 +7,37 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 public class PatientController {
+
+    Pattern pattern = Pattern.compile("[0-9]{11}");
+
 
     @Autowired
     private PatientRepository patientRepository;
 
     @PostMapping(path = "/patients")
-    @ResponseStatus(HttpStatus.CREATED)
-    public void add(@RequestBody Patient patient) {
-        patientRepository.save(patient);
+    public @ResponseBody ResponseEntity<String> add(@RequestBody Patient patient) {
+        String pesel = patient.getPesel();
+        Matcher matcher = pattern.matcher(pesel);
+
+        if(patient.getPesel() != null){
+            if (matcher.matches()) {
+                try {
+                    patientRepository.save(patient);
+                    return new ResponseEntity<>("Zapisano",HttpStatus.CREATED);
+                } catch (IllegalArgumentException e) {
+                    return new ResponseEntity<>("Nie udało się dodać pacjenta", HttpStatus.NOT_MODIFIED);
+                }
+            } else {
+                return new ResponseEntity<>("Nie zapisano, długość numeru pesel jest niepoprawna, bądź użyto niedozwolonych znaków lub liter", HttpStatus.NOT_ACCEPTABLE);
+            }
+        }else{
+            return new ResponseEntity<>("Nie zapisano, podaj pesel", HttpStatus.NOT_ACCEPTABLE);
+        }
     }
     
 
@@ -33,9 +53,9 @@ public class PatientController {
     }
 
     @DeleteMapping(path = "/patients/{id}")
-    public @ResponseBody
-    void deletePatientById(@PathVariable Integer id) {
+    public ResponseEntity<Void> deletePatientById(@PathVariable Integer id) {
           patientRepository.deleteById(id);
+        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping("/patients/{id}")
