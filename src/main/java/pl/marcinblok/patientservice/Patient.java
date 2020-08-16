@@ -14,17 +14,15 @@ import javax.persistence.Id;
 public class Patient {
     private static final long serialVersionUID = 1L;
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
     private String name;
     private String surname;
     private String pesel;
 
     public Patient() {
     }
-
 
     public Patient(String name, String surname, String pesel) {
         this.name = name;
