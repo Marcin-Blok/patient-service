@@ -6,7 +6,7 @@
 
 ### dodanie pacjenta
 `
-curl -d @example.json -H "Content-Type: application/json" -X POST http://localhost:8080/patient
+curl -d @example.json -H "Content-Type: application/json" -X POST http://localhost:8080/patients
 `
 
 # Author
