@@ -1,6 +1,7 @@
 package pl.marcinblok.patientservice;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,18 +27,22 @@ public class PatientController {
         Matcher matcher = pattern.matcher(pesel);
 
         if (patient.getName() != null && patient.getSurname() != null && patient.getPesel() != null) {
-            if (matcher.matches()) {
-                try {
-                    patientRepository.save(patient);
-                    return new ResponseEntity<>("Zapisano", HttpStatus.CREATED);
-                } catch (IllegalArgumentException e) {
-                    return new ResponseEntity<>("Nie udało się dodać pacjenta", HttpStatus.NOT_MODIFIED);
-                }
-            } else {
-                return new ResponseEntity<>("Nie zapisano, długość numeru pesel jest niepoprawna, bądź użyto niedozwolonych znaków lub liter", HttpStatus.NOT_ACCEPTABLE);
-            }
+            return peselValidator(patient, matcher);
         } else {
             return new ResponseEntity<>("Nie zapisano, następujące pola muszą zostać wypełnione: Imię, Nazwisko, Pesel", HttpStatus.NOT_ACCEPTABLE);
+        }
+    }
+
+    private ResponseEntity<String> peselValidator(@RequestBody Patient patient, Matcher matcher) {
+        if (matcher.matches()) {
+            try {
+                patientRepository.save(patient);
+                return new ResponseEntity<>("Zapisano", HttpStatus.CREATED);
+            } catch (IllegalArgumentException e) {
+                return new ResponseEntity<>("Nie udało się dodać pacjenta", HttpStatus.NOT_MODIFIED);
+            }
+        } else {
+            return new ResponseEntity<>("Nie zapisano, długość numeru pesel jest niepoprawna, bądź użyto niedozwolonych znaków lub liter", HttpStatus.NOT_ACCEPTABLE);
         }
     }
 
@@ -54,9 +59,14 @@ public class PatientController {
     }
 
     @DeleteMapping(path = "/patients/{id}")
-    public ResponseEntity<Void> deletePatientById(@PathVariable Integer id) {
-        patientRepository.deleteById(id);
-        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+    public @ResponseBody
+    ResponseEntity<String> deletePatientById(@PathVariable Integer id) {
+        try {
+            patientRepository.deleteById(id);
+            return new ResponseEntity<>("Pacjent o podanym id został usunięty.", HttpStatus.OK);
+        } catch (EmptyResultDataAccessException e) {
+            return new ResponseEntity<>("Nie usunięto, wpis o podanym id nie istnieje", HttpStatus.NOT_IMPLEMENTED);
+        }
     }
 
     @PutMapping("/patients/{id}")
